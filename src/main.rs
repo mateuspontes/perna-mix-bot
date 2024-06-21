@@ -1,3 +1,4 @@
+use axum::{routing::get, Router};
 use rand::seq::SliceRandom;
 use rand::thread_rng;
 use std::env;
@@ -31,6 +32,10 @@ const HELP_COMMAND: &str = "!help";
 const MIX_COMMAND: &str = "!mix";
 
 struct Handler;
+
+async fn healthcheck() -> &'static str {
+    "Working"
+}
 
 #[async_trait]
 impl EventHandler for Handler {
@@ -76,8 +81,8 @@ impl EventHandler for Handler {
     }
 }
 
-#[tokio::main]
-async fn main() {
+#[shuttle_runtime::main]
+pub async fn axum() -> shuttle_axum::ShuttleAxum {
     let token = env::var("DISCORD_TOKEN").expect("Expected a token in the environment");
 
     let mut client = Client::builder(&token, GatewayIntents::all())
@@ -85,7 +90,11 @@ async fn main() {
         .await
         .expect("Err creating client");
 
+    let router = Router::new().route("/healthcheck", get(healthcheck));
+
     if let Err(why) = client.start().await {
         println!("Client error: {:?}", why);
     }
+
+    Ok(router.into())
 }
