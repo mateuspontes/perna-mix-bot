@@ -2,7 +2,6 @@ use axum::{routing::get, Router};
 use rand::seq::SliceRandom;
 use rand::thread_rng;
 use shuttle_runtime::SecretStore;
-use std::env;
 
 use serenity::{
     async_trait,
