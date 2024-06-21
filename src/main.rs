@@ -15,7 +15,7 @@ Perna Bot aqui! 🐦
 Você invocou meus poderes, vamos ver o que posso fazer por você:
 
 ❓ Sorteio de um MIX?
-➡️ Digit `!mix` com o nome dos meliantes separados por vírgula.
+➡️ Digite `!mix` com o nome dos meliantes separados por vírgula.
 
 ❓ Quer ver os mandamentos do Perna?
 ➡️ Aqui está: <https://discord.com/channels/776249840938123286/1128670966449438841/1128670966449438841>
