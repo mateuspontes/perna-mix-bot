@@ -1,6 +1,7 @@
 use axum::{routing::get, Router};
 use rand::seq::SliceRandom;
 use rand::thread_rng;
+use shuttle_runtime::SecretStore;
 use std::env;
 
 use serenity::{
@@ -82,10 +83,10 @@ impl EventHandler for Handler {
 }
 
 #[shuttle_runtime::main]
-pub async fn axum() -> shuttle_axum::ShuttleAxum {
-    let token = env::var("DISCORD_TOKEN").expect("Expected a token in the environment");
+pub async fn axum(#[shuttle_runtime::Secrets] secrets: SecretStore) -> shuttle_axum::ShuttleAxum {
+    let token = secrets.get("DISCORD_TOKEN");
 
-    let mut client = Client::builder(&token, GatewayIntents::all())
+    let mut client = Client::builder(token.unwrap(), GatewayIntents::all())
         .event_handler(Handler)
         .await
         .expect("Err creating client");
