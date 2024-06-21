@@ -1,5 +1,5 @@
 [package]
-name = "perna-bot"
+name = "perna-mix-bot"
 version = "0.1.0"
 edition = "2021"
 
