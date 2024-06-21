@@ -28,8 +28,15 @@ Boa jogatina!
 — PernaBot 🤖
 ";
 
+const REPORT_MESSAGE: &str = "
+🚨 **Reporte de usuário** 🚨
+
+👮‍♂️ Obrigado por enviar o usuário para a moderação. Vamos analisar o caso e tomar as devidas providências. 🚔
+";
+
 const HELP_COMMAND: &str = "!help";
 const MIX_COMMAND: &str = "!mix";
+const REPORT_COMMAND: &str = "!report";
 
 struct Handler;
 
@@ -42,6 +49,12 @@ impl EventHandler for Handler {
     async fn message(&self, ctx: Context, msg: Message) {
         if msg.content == HELP_COMMAND {
             if let Err(why) = msg.channel_id.say(&ctx.http, HELP_MESSAGE).await {
+                println!("Error sending message: {:?}", why);
+            }
+        }
+
+        if msg.content.starts_with(REPORT_COMMAND) {
+            if let Err(why) = msg.channel_id.say(&ctx.http, REPORT_MESSAGE).await {
                 println!("Error sending message: {:?}", why);
             }
         }
