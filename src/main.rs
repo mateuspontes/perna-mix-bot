@@ -65,26 +65,37 @@ impl EventHandler for Handler {
                 .strip_prefix(MIX_COMMAND)
                 .unwrap_or(msg.content.as_str());
 
-            println!("Vamos sortear um mix com os meliantes: {:?}", cleaned_input);
 
-            // get the parameters separated by comma, split then by comma and trim the whitespaces
-            let mut users: Vec<&str> = cleaned_input.split(',').map(|s| s.trim()).collect();
+            // if the input is empty, return an error message
+            if cleaned_input.trim().is_empty() {
+                if let Err(why) = msg.channel_id.say(&ctx.http, "🚨 Você precisa informar o nome dos jogadores, separados por vírgula! Não é tão difícil, basta ler.")
+                    .await {
+                    println!("Error sending message: {:?}", why);
+                }
+                return;
 
-            // shuffle the list
-            users.shuffle(&mut thread_rng());
+            } else {
+                println!("Vamos sortear um mix com os meliantes: {:?}", cleaned_input);
 
-            // get the first 5 users from the list
-            let team_a: Vec<&str> = users.iter().take(5).copied().collect();
-            let team_b: Vec<&str> = users.iter().skip(5).copied().collect();
+                // get the parameters separated by comma, split then by comma and trim the whitespaces
+                let mut users: Vec<&str> = cleaned_input.split(',').map(|s| s.trim()).collect();
 
-            let response = format!(
-                "# Time A 🔫:\n {}\n\n# Time B 🔫:\n {}\n\n🔮 Chama novamente se alguém chorar dizendo que não tá balanceado 😢",
-                team_a.join(", "),
-                team_b.join(", ")
-            );
+                // shuffle the list
+                users.shuffle(&mut thread_rng());
 
-            if let Err(why) = msg.channel_id.say(&ctx.http, response).await {
-                println!("Error sending message: {:?}", why);
+                // get the first 5 users from the list
+                let team_a: Vec<&str> = users.iter().take(5).copied().collect();
+                let team_b: Vec<&str> = users.iter().skip(5).copied().collect();
+
+                let response = format!(
+                    "# Time A 🔫:\n {}\n\n# Time B 🔫:\n {}\n\n🔮 Chama novamente se alguém chorar dizendo que não tá balanceado 😢",
+                    team_a.join(", "),
+                    team_b.join(", ")
+                );
+
+                if let Err(why) = msg.channel_id.say(&ctx.http, response).await {
+                    println!("Error sending message: {:?}", why);
+                }
             }
         }
     }
