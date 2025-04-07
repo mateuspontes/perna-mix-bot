@@ -118,8 +118,9 @@ pub async fn axum(#[shuttle_runtime::Secrets] secrets: SecretStore) -> shuttle_a
         .await
         .expect("Err creating client");
 
-    let router = Router::new().route("/", get(home));
-    let router = Router::new().route("/healthcheck", get(healthcheck));
+    let router = Router::new()
+        .route("/", get(home))
+        .route("/healthcheck", get(healthcheck));
 
     if let Err(why) = client.start().await {
         println!("Client error: {:?}", why);
