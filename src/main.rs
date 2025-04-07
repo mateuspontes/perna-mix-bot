@@ -40,6 +40,10 @@ const REPORT_COMMAND: &str = "!report";
 
 struct Handler;
 
+async fn home() -> &'static str {
+    "Hello From Perna Mix Bot 👮‍♂️"
+}
+
 async fn healthcheck() -> &'static str {
     "Working"
 }
@@ -114,6 +118,7 @@ pub async fn axum(#[shuttle_runtime::Secrets] secrets: SecretStore) -> shuttle_a
         .await
         .expect("Err creating client");
 
+    let router = Router::new().route("/", get(home));
     let router = Router::new().route("/healthcheck", get(healthcheck));
 
     if let Err(why) = client.start().await {
