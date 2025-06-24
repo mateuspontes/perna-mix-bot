@@ -3,6 +3,8 @@ use shuttle_axum::ShuttleAxum; // Importando ShuttleAxum para o retorno correto
 use rand::seq::SliceRandom;
 use rand::thread_rng;
 use shuttle_runtime::SecretStore;
+use tokio::signal;
+use std::sync::Arc;
 
 use serenity::{
     async_trait,
@@ -176,8 +178,16 @@ impl EventHandler for Handler {
         }
     }
 
-    async fn ready(&self, _: Context, ready: Ready) {
+    async fn ready(&self, ctx: Context, ready: Ready) {
         println!("{} is connected!", ready.user.name);
+
+        // Send startup message to a specific channel
+        let channel_id = ChannelId(1132852398654754866);
+        let startup_message = "🤖 **Perna Bot está ONLINE!** 🎯";
+
+        if let Err(why) = channel_id.say(&ctx.http, startup_message).await {
+            println!("Error sending startup message: {:?}", why);
+        }
     }
 
     async fn interaction_create(&self, ctx: Context, interaction: Interaction) {
@@ -239,19 +249,48 @@ pub async fn axum(#[shuttle_runtime::Secrets] secrets: SecretStore) -> ShuttleAx
         .configure(|c| c.prefix("!"))
         .group(&GENERAL_GROUP);
 
-    let mut client = Client::builder(token.unwrap(), GatewayIntents::all())
+    let client = Client::builder(token.unwrap(), GatewayIntents::all())
         .framework(framework)
         .event_handler(Handler)
         .await
         .expect("Err creating client");
 
+    let client = Arc::new(client);
+    let client_clone = Arc::clone(&client);
+
+    // Spawn the Discord client in a separate task
+    tokio::spawn(async move {
+        // Setup shutdown signal handler
+        let shutdown_signal = async {
+            signal::ctrl_c().await.expect("Failed to install CTRL+C signal handler");
+        };
+
+        tokio::select! {
+            result = client_clone.start() => {
+                if let Err(why) = result {
+                    println!("Client error: {:?}", why);
+                }
+            }
+            _ = shutdown_signal => {
+                println!("Received shutdown signal, sending goodbye message...");
+
+                // Send shutdown message
+                let channel_id = ChannelId(1132852398654754866);
+                let shutdown_message = "🔴 **Perna Bot está OFFLINE!** \n\nVolto em breve para sortear Mix! 👋";
+
+                if let Err(why) = channel_id.say(&client_clone.cache_and_http.http, shutdown_message).await {
+                    println!("Error sending shutdown message: {:?}", why);
+                }
+
+                // Give some time for the message to be sent
+                tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
+            }
+        }
+    });
+
     let router = Router::new()
         .route("/", get(home))
         .route("/healthcheck", get(healthcheck));
-
-    if let Err(why) = client.start().await {
-        println!("Client error: {:?}", why);
-    }
 
     Ok(router.into())
 }
