@@ -4,7 +4,6 @@ use rand::seq::SliceRandom;
 use rand::thread_rng;
 use shuttle_runtime::SecretStore;
 use tokio::signal;
-use std::sync::Arc;
 
 use serenity::{
     async_trait,
@@ -249,14 +248,11 @@ pub async fn axum(#[shuttle_runtime::Secrets] secrets: SecretStore) -> ShuttleAx
         .configure(|c| c.prefix("!"))
         .group(&GENERAL_GROUP);
 
-    let client = Client::builder(token.unwrap(), GatewayIntents::all())
+    let mut client = Client::builder(token.unwrap(), GatewayIntents::all())
         .framework(framework)
         .event_handler(Handler)
         .await
         .expect("Err creating client");
-
-    let client = Arc::new(client);
-    let client_clone = Arc::clone(&client);
 
     // Spawn the Discord client in a separate task
     tokio::spawn(async move {
@@ -266,7 +262,7 @@ pub async fn axum(#[shuttle_runtime::Secrets] secrets: SecretStore) -> ShuttleAx
         };
 
         tokio::select! {
-            result = client_clone.start() => {
+            result = client.start() => {
                 if let Err(why) = result {
                     println!("Client error: {:?}", why);
                 }
@@ -278,7 +274,7 @@ pub async fn axum(#[shuttle_runtime::Secrets] secrets: SecretStore) -> ShuttleAx
                 let channel_id = ChannelId(1132852398654754866);
                 let shutdown_message = "🔴 **Perna Bot está OFFLINE!** \n\nVolto em breve para sortear Mix! 👋";
 
-                if let Err(why) = channel_id.say(&client_clone.cache_and_http.http, shutdown_message).await {
+                if let Err(why) = channel_id.say(&client.cache_and_http.http, shutdown_message).await {
                     println!("Error sending shutdown message: {:?}", why);
                 }
 
