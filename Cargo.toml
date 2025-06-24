@@ -8,5 +8,5 @@ rand = "0.8"
 axum = "0.7"
 serenity = { version = "0.11.6", default-features = false, features = ["client", "gateway", "http", "model", "standard_framework", "rustls_backend"] }
 tokio = { version = "1.38.0", features = ["full"] }
-shuttle-runtime = "0.49.0"
-shuttle-axum = "0.49.0"
+shuttle-runtime = "0.50.0"
+shuttle-axum = "0.50.0"
