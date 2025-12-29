@@ -1,10 +1,13 @@
 """Discord client and event handlers."""
 
+import logging
 import discord
 from discord.ext import commands
 
 from .constants import HELP_COMMAND, MIX_COMMAND, REPORT_COMMAND, NOTIFICATION_CHANNEL_ID
 from .commands import handle_help_command, handle_mix_command, handle_report_command
+
+logger = logging.getLogger(__name__)
 
 
 class PernaBot(discord.Client):
@@ -16,12 +19,15 @@ class PernaBot(discord.Client):
 
     async def on_ready(self):
         """Called when the bot is ready."""
-        print(f"{self.user.name} is connected!")
+        logger.info(f"[DISCORD] Bot connected as {self.user.name} (ID: {self.user.id})")
 
         # Send startup message to notification channel
         channel = self.get_channel(NOTIFICATION_CHANNEL_ID)
         if channel:
+            logger.info(f"[DISCORD] Sending startup message to channel {NOTIFICATION_CHANNEL_ID}")
             await channel.send("🤖 **Perna Bot está ONLINE!** 🎯")
+        else:
+            logger.warning(f"[DISCORD] Notification channel {NOTIFICATION_CHANNEL_ID} not found")
 
     async def on_message(self, message: discord.Message):
         """Handle incoming messages."""
@@ -43,4 +49,7 @@ class PernaBot(discord.Client):
         """Send shutdown notification message."""
         channel = self.get_channel(NOTIFICATION_CHANNEL_ID)
         if channel:
+            logger.info(f"[DISCORD] Sending shutdown message to channel {NOTIFICATION_CHANNEL_ID}")
             await channel.send("🔴 **Perna Bot está OFFLINE!** \nVolto em breve para sortear Mix! 👋")
+        else:
+            logger.warning(f"[DISCORD] Notification channel {NOTIFICATION_CHANNEL_ID} not found")
