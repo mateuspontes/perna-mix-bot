@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: perna-mix-bot
+    runtime: docker
+    plan: free
+    healthCheckPath: /healthcheck
+    envVars:
+      - key: DISCORD_TOKEN
+        sync: false
+      - key: PORT
+        value: 10000

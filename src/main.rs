@@ -1,9 +1,7 @@
-use axum::{routing::get, Router}; // Importando diretamente de axum
-use shuttle_axum::ShuttleAxum; // Importando ShuttleAxum para o retorno correto
+use axum::{routing::get, Router};
 use rand::seq::SliceRandom;
 use rand::thread_rng;
-use shuttle_runtime::SecretStore;
-use tokio::signal;
+use std::env;
 
 use serenity::{
     async_trait,
@@ -240,53 +238,67 @@ async fn ping(ctx: &Context, msg: &Message) -> CommandResult {
     Ok(())
 }
 
-#[shuttle_runtime::main]
-pub async fn axum(#[shuttle_runtime::Secrets] secrets: SecretStore) -> ShuttleAxum {
-    let token = secrets.get("DISCORD_TOKEN");
+#[tokio::main]
+async fn main() {
+    // Get Discord token from environment variable
+    let token = env::var("DISCORD_TOKEN").expect("Expected DISCORD_TOKEN in environment");
 
     let framework = StandardFramework::new()
         .configure(|c| c.prefix("!"))
         .group(&GENERAL_GROUP);
 
-    let mut client = Client::builder(token.unwrap(), GatewayIntents::all())
+    let mut client = Client::builder(token, GatewayIntents::all())
         .framework(framework)
         .event_handler(Handler)
         .await
-        .expect("Err creating client");
+        .expect("Error creating client");
+
+    // Clone the HTTP client for the shutdown handler
+    let http = client.cache_and_http.http.clone();
 
     // Spawn the Discord client in a separate task
-    tokio::spawn(async move {
-        // Setup shutdown signal handler
-        let shutdown_signal = async {
-            signal::ctrl_c().await.expect("Failed to install CTRL+C signal handler");
-        };
-
-        tokio::select! {
-            result = client.start() => {
-                if let Err(why) = result {
-                    println!("Client error: {:?}", why);
-                }
-            }
-            _ = shutdown_signal => {
-                println!("Received shutdown signal, sending goodbye message...");
-
-                // Send shutdown message
-                let channel_id = ChannelId(1132852398654754866);
-                let shutdown_message = "🔴 **Perna Bot está OFFLINE!** \n\nVolto em breve para sortear Mix! 👋";
-
-                if let Err(why) = channel_id.say(&client.cache_and_http.http, shutdown_message).await {
-                    println!("Error sending shutdown message: {:?}", why);
-                }
-
-                // Give some time for the message to be sent
-                tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
-            }
+    let client_handle = tokio::spawn(async move {
+        if let Err(why) = client.start().await {
+            println!("Client error: {:?}", why);
         }
     });
 
-    let router = Router::new()
-        .route("/", get(home))
-        .route("/healthcheck", get(healthcheck));
+    // Spawn the web server in a separate task
+    let web_handle = tokio::spawn(async move {
+        let port = env::var("PORT").unwrap_or_else(|_| "10000".to_string());
+        let addr = format!("0.0.0.0:{}", port);
 
-    Ok(router.into())
+        let router = Router::new()
+            .route("/", get(home))
+            .route("/healthcheck", get(healthcheck));
+
+        println!("Web server listening on {}", addr);
+
+        let listener = tokio::net::TcpListener::bind(&addr).await.unwrap();
+        axum::serve(listener, router).await.unwrap();
+    });
+
+    // Setup shutdown signal handler
+    tokio::select! {
+        _ = client_handle => {
+            println!("Discord client stopped");
+        }
+        _ = web_handle => {
+            println!("Web server stopped");
+        }
+        _ = tokio::signal::ctrl_c() => {
+            println!("Received shutdown signal, sending goodbye message...");
+
+            // Send shutdown message
+            let channel_id = ChannelId(1132852398654754866);
+            let shutdown_message = "🔴 **Perna Bot está OFFLINE!** \nVolto em breve para sortear Mix! 👋";
+
+            if let Err(why) = channel_id.say(&http, shutdown_message).await {
+                println!("Error sending shutdown message: {:?}", why);
+            }
+
+            // Give some time for the message to be sent
+            tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
+        }
+    }
 }
