@@ -11,3 +11,6 @@ services:
       - key: PORT
         value: 10000
     healthCheckPath: /healthcheck
+    autoDeploy: true
+    # Prevent rapid restarts that can trigger rate limits
+    maxShutdownDelaySeconds: 10
