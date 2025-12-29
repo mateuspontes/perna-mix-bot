@@ -1,30 +1,22 @@
-# Build stage
-FROM rust:1.75 as builder
+# Use Python 3.11 slim image
+FROM python:3.11-slim
 
 WORKDIR /app
 
-# Copy manifests
-COPY Cargo.toml ./
-
-# Copy source code
-COPY src ./src
-
-# Build for release
-RUN cargo build --release
-
-# Runtime stage
-FROM debian:bookworm-slim
-
-# Install necessary runtime dependencies
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
     ca-certificates \
-    libssl3 \
     && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /app
+# Copy requirements first for better caching
+COPY requirements.txt .
 
-# Copy the binary from builder
-COPY --from=builder /app/target/release/perna-mix-bot /app/perna-mix-bot
+# Install Python dependencies
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy application code
+COPY bot/ ./bot/
+COPY main.py .
 
 # Expose port for health checks
 EXPOSE 10000
@@ -33,4 +25,4 @@ EXPOSE 10000
 ENV PORT=10000
 
 # Run the bot
-CMD ["/app/perna-mix-bot"]
+CMD ["python", "main.py"]
