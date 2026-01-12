@@ -22,12 +22,16 @@ class PernaBot(discord.Client):
         logger.info(f"[DISCORD] Bot connected as {self.user.name} (ID: {self.user.id})")
 
         # Send startup message to notification channel
-        channel = self.get_channel(NOTIFICATION_CHANNEL_ID)
-        if channel:
+        try:
+            channel = await self.fetch_channel(NOTIFICATION_CHANNEL_ID)
             logger.info(f"[DISCORD] Sending startup message to channel {NOTIFICATION_CHANNEL_ID}")
             await channel.send("🤖 **Perna Bot está ONLINE!** 🎯")
-        else:
+        except discord.errors.NotFound:
             logger.warning(f"[DISCORD] Notification channel {NOTIFICATION_CHANNEL_ID} not found")
+        except discord.errors.Forbidden:
+            logger.warning(f"[DISCORD] No permission to access notification channel {NOTIFICATION_CHANNEL_ID}")
+        except Exception as e:
+            logger.warning(f"[DISCORD] Error accessing notification channel {NOTIFICATION_CHANNEL_ID}: {e}")
 
     async def on_message(self, message: discord.Message):
         """Handle incoming messages."""
@@ -47,9 +51,13 @@ class PernaBot(discord.Client):
 
     async def send_shutdown_message(self):
         """Send shutdown notification message."""
-        channel = self.get_channel(NOTIFICATION_CHANNEL_ID)
-        if channel:
+        try:
+            channel = await self.fetch_channel(NOTIFICATION_CHANNEL_ID)
             logger.info(f"[DISCORD] Sending shutdown message to channel {NOTIFICATION_CHANNEL_ID}")
             await channel.send("🔴 **Perna Bot está OFFLINE!** \nVolto em breve para sortear Mix! 👋")
-        else:
+        except discord.errors.NotFound:
             logger.warning(f"[DISCORD] Notification channel {NOTIFICATION_CHANNEL_ID} not found")
+        except discord.errors.Forbidden:
+            logger.warning(f"[DISCORD] No permission to access notification channel {NOTIFICATION_CHANNEL_ID}")
+        except Exception as e:
+            logger.warning(f"[DISCORD] Error accessing notification channel {NOTIFICATION_CHANNEL_ID}: {e}")

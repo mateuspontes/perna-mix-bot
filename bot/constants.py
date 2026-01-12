@@ -6,7 +6,11 @@ Perna Bot aqui! 🐦
 Você invocou meus poderes, vamos ver o que posso fazer por você:
 
 ❓ Sorteio de um MIX?
-➡️ Digite `!mix` com o nome dos meliantes separados por vírgula.
+➡️ Digite `!mix` com o nome dos meliantes separados por vírgula. (ou de qualquer outra forma burra)
+
+💡 Quer equilibrar os times? Use parênteses, colchetes ou chaves para agrupar jogadores!
+   Exemplo: `!mix (Jogador1, Jogador2) Jogador3, Jogador4`
+   Os grupos serão distribuídos equilibradamente entre os times. Acabou a panela! 🍳🎯
 
 ❓ Quer ver os mandamentos do Perna?
 ➡️ Aqui está: <https://discord.com/channels/776249840938123286/1128670966449438841/1128670966449438841>
