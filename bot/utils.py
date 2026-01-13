@@ -3,7 +3,7 @@
 import re
 import random
 import discord
-from typing import List, Optional, Tuple, Dict
+from typing import List, Optional
 
 
 def parse_players(text: str, message: discord.Message) -> List[str]:
@@ -31,11 +31,12 @@ def parse_players(text: str, message: discord.Message) -> List[str]:
     mentions = re.findall(mention_pattern, text)
 
     for user_id in mentions:
-        member = message.guild.get_member(int(user_id))
+        member = message.guild.get_member(int(user_id)) if message.guild else None
         if member:
             # Replace mention with display name
             text = re.sub(f'<@!?{user_id}>', member.display_name, text)
 
+    # Remove brackets so they don't interfere with player name parsing
     text = re.sub(r'[()[\]{}]', ' ', text)
 
     # Note: @username format (not a real mention) will be handled by separator logic
@@ -85,7 +86,7 @@ def extract_groups_from_text(text: str, message: discord.Message) -> List[List[s
     mentions = re.findall(mention_pattern, text)
 
     for user_id in mentions:
-        member = message.guild.get_member(int(user_id))
+        member = message.guild.get_member(int(user_id)) if message.guild else None
         if member:
             text = re.sub(f'<@!?{user_id}>', member.display_name, text)
 
