@@ -6,11 +6,24 @@ Perna Bot aqui! 🐦
 Você invocou meus poderes, vamos ver o que posso fazer por você:
 
 ❓ Sorteio de um MIX?
-➡️ Digite `!mix` com o nome dos meliantes separados por vírgula. (ou de qualquer outra forma burra)
+➡️ Digite `!mix` com o nome dos jogadores separados por vírgula, espaço, hífen... (aceito qualquer formato burro mesmo)
 
-💡 Quer equilibrar os times? Use parênteses, colchetes ou chaves para agrupar jogadores!
-   Exemplo: `!mix (Jogador1, Jogador2) Jogador3, Jogador4`
-   Os grupos serão distribuídos equilibradamente entre os times. Acabou a panela! 🍳🎯
+   **Exemplos:**
+   • `!mix João, Maria, Pedro, Ana` (vírgula)
+   • `!mix João Maria Pedro Ana` (espaço)
+   • `!mix João - Maria - Pedro` (hífen)
+   • `!mix @João @Maria @Pedro` (menções do Discord)
+   • `!mix` (estando em um canal de voz - pega todos automaticamente! 🎤)
+
+🚫 **ANTI-PANELA:** Use parênteses, colchetes ou chaves para marcar jogadores que jogam muito juntos!
+   Os jogadores agrupados serão **SEPARADOS** entre os times para equilibrar.
+
+   **Exemplos:**
+   • `!mix (João, Maria) Pedro Ana Carlos` → João e Maria vão para times diferentes
+   • `!mix [Tryhard1, Tryhard2] Casual1 Casual2` → Os tryhards são separados
+   • `!mix {Amigo1, Amigo2, Amigo3} Resto1 Resto2` → Amigos distribuídos entre os times
+
+   ⚖️ Resultado: Times mais equilibrados, sem panelinha dominando! 🎯
 
 ❓ Quer ver os mandamentos do Perna?
 ➡️ Aqui está: <https://discord.com/channels/776249840938123286/1128670966449438841/1128670966449438841>
