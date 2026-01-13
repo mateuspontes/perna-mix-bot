@@ -8,12 +8,16 @@ Bot Discord para sortear times de MIX de forma aleatória e equilibrada.
 - **!mix** - Sorteia times aleatórios (até 5 jogadores por time)
 - **!report** - Sistema de reporte de usuários
 
-## Deploy no pella.app
+## Deploy
+
+### pella.app (Free, renovação manual diária)
 
 1. Acesse [pella.app](https://pella.app)
 2. Faça upload do projeto
 3. Configure a variável `DISCORD_TOKEN`
 4. Start command: `python main.py`
+
+### [Railway](https://railway.com/)
 
 ## Local
 
