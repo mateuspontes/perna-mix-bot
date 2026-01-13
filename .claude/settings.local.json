@@ -3,7 +3,12 @@
     "allow": [
       "Bash(pip config:*)",
       "Bash(pip install:*)",
-      "Bash(source:*)"
+      "Bash(source:*)",
+      "Bash(gh pr diff:*)",
+      "Bash(gh pr checks:*)",
+      "Bash(/usr/bin/git log --oneline -3)",
+      "Bash(/usr/bin/git add bot/constants.py README.md)",
+      "Bash(gh pr view:*)"
     ],
     "deny": [],
     "ask": []

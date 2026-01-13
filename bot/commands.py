@@ -66,9 +66,7 @@ async def handle_mix_command(message: discord.Message):
             )
             return
 
-        groups = extract_groups_from_text(cleaned_input, message)
-        if not groups:
-            groups = None
+        groups = extract_groups_from_text(cleaned_input, message) or None
 
     # Create buttons
     view = MixView(users, groups)

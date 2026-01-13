@@ -6,6 +6,27 @@ import discord
 from typing import List, Optional
 
 
+def _replace_mentions_with_display_names(text: str, message: discord.Message) -> str:
+    """Replace Discord mentions with display names.
+
+    Args:
+        text: Text containing mentions (<@id> or <@!id>)
+        message: Discord message object to access mentions
+
+    Returns:
+        Text with mentions replaced by display names
+    """
+    mention_pattern = r'<@!?(\d+)>'
+    mentions = re.findall(mention_pattern, text)
+
+    for user_id in mentions:
+        member = message.guild.get_member(int(user_id)) if message.guild else None
+        if member:
+            text = re.sub(f'<@!?{user_id}>', member.display_name, text)
+
+    return text
+
+
 def parse_players(text: str, message: discord.Message) -> List[str]:
     """Parse player names from text input, handling multiple formats.
 
@@ -26,15 +47,8 @@ def parse_players(text: str, message: discord.Message) -> List[str]:
     if not text:
         return []
 
-    # Replace Discord mentions (<@id> or <@!id>) with display names
-    mention_pattern = r'<@!?(\d+)>'
-    mentions = re.findall(mention_pattern, text)
-
-    for user_id in mentions:
-        member = message.guild.get_member(int(user_id)) if message.guild else None
-        if member:
-            # Replace mention with display name
-            text = re.sub(f'<@!?{user_id}>', member.display_name, text)
+    # Replace Discord mentions with display names
+    text = _replace_mentions_with_display_names(text, message)
 
     # Remove brackets so they don't interfere with player name parsing
     text = re.sub(r'[()[\]{}]', ' ', text)
@@ -54,8 +68,8 @@ def parse_players(text: str, message: discord.Message) -> List[str]:
 
     for player in players:
         player = player.strip()
-        # Remove empty strings and very short names (likely artifacts)
-        if player and len(player) > 0:
+        # Remove empty strings
+        if player:
             # Normalize: remove extra spaces, convert to lowercase for duplicate check
             normalized = ' '.join(player.split())
             normalized_lower = normalized.lower()
@@ -81,14 +95,8 @@ def extract_groups_from_text(text: str, message: discord.Message) -> List[List[s
     if not text:
         return []
 
-    # Replace Discord mentions with display names first
-    mention_pattern = r'<@!?(\d+)>'
-    mentions = re.findall(mention_pattern, text)
-
-    for user_id in mentions:
-        member = message.guild.get_member(int(user_id)) if message.guild else None
-        if member:
-            text = re.sub(f'<@!?{user_id}>', member.display_name, text)
+    # Replace Discord mentions with display names
+    text = _replace_mentions_with_display_names(text, message)
 
     groups = []
 
@@ -166,9 +174,6 @@ def balance_teams_with_groups(players: List[str], groups: List[List[str]]) -> Li
         team_b_grouped.extend(group_players[mid:])
 
     random.shuffle(ungrouped_players)
-
-    total_players = len(players)
-    target_team_size = (total_players + 1) // 2
 
     current_a_size = len(team_a_grouped)
     current_b_size = len(team_b_grouped)
